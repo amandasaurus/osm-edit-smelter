@@ -1,0 +1,6 @@
+[general]
+root = "./"
+port = 8000
+log-level = "info"
+compression = true
+cache-control-headers = true

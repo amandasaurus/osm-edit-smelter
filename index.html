@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="data:,">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>STATS</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 20px; }
+  </style>
+  <script src="./alpinejs-3.15.11.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+
+	
+	<button @click="clear_local_cache()">Clear local cache</button>
+	<form @submit.prevent="generate_stats($data)" x-data="{ date_range: '-7days', from_datetime:'', to_datetime:'', is_calculating: false }">
+		<select x-model="date_range">
+			<option value="-7days">Last week</option>
+			<option value="-24hours">Last 24 hours</option>
+			<option value="-6weeks">Last 6 weeks</option>
+			<option value="custom">Custom</option>
+		</select>
+
+		<div x-show="date_range == 'custom'">
+			Start: <input id="from_datetime" x-model="from_datetime" type="datetime-local" @input="$event.target.setCustomValidity('')"  />
+			End: <input id="to_datetime" x-model="to_datetime" type="datetime-local" @input="$event.target.setCustomValidity('')" /> 
+		</div>
+		<button submit>Calculate!</button>
+		<div x-show="is_calculating">
+			Working: <progress id="task_process", value=0 max=0></progress>
+		</div>
+
+	<div id="output"></div>
+
+
+</body>
+</html>
