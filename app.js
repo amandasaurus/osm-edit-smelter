@@ -5,9 +5,12 @@ async function generate_stats(data) {
 	if (!data.is_valid) {
 		return;
 	}
+	document.getElementById("output").innerHTML = "";
 	await fetch_user_data(data);
 
 	var [tagged_object_changes, tag_changes] = calcTagChanges(data.from_datetime, data.to_datetime);
+
+	document.getElementById("output").innerHTML = formatTagChanges(tag_changes);
 }
 
 function parse_out_dates(data) {
@@ -307,4 +310,25 @@ function getDaysBetween(start, end) {
 	}
 
 	return days;
+}
+
+function formatTagChanges(tag_changes) {
+	var res = []
+	for (const k of Object.keys(tag_changes)) {
+		res.push([tag_changes[k].create+tag_changes[k].modify+tag_changes[k].delete, k]);
+	}
+
+	res.sort((a, b) => (b[0]-a[0]));
+	var res = res.slice(0, 5);
+
+	var summary = "<table><tr><th>Tag</th><th>Total Changes</th><th>Added</th><th>Modified</th><th>Deleted</th><tr>";
+
+	for (const [total, k] of res) {
+		summary += `<tr><td><code>${k}</code></td><td>${total}</td><td>${tag_changes[k].create}</td><td>${tag_changes[k].modify}</td><td>${tag_changes[k].delete}</td></tr>`;
+	}
+
+	summary += "</table>";
+
+	console.log(output);
+	return summary;
 }
