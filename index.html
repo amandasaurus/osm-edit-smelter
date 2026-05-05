@@ -15,7 +15,7 @@
 
 	
 	<button @click="clear_local_cache()">Clear local cache</button>
-	<form @submit.prevent="generate_stats($data)" x-data="{ date_range: '-7days', from_datetime:'', to_datetime:'', is_calculating: false }">
+	<form @submit.prevent="generate_stats($data)" x-data="{ date_range: '-7days', from_datetime:'', to_datetime:'', is_calculating: false, is_valid: true }">
 		<select x-model="date_range">
 			<option value="-7days">Last week</option>
 			<option value="-24hours">Last 24 hours</option>

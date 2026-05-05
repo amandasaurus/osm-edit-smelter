@@ -1,8 +1,52 @@
 const API_URL = "https://api.openstreetmap.org"
 
 async function generate_stats(data) {
+	parse_out_dates(data);
+	if (!data.is_valid) {
+		return;
+	}
 	await fetch_user_data(data);
-	produceDiff();
+
+	var [tagged_object_changes, tag_changes] = calcTagChanges(data.from_datetime, data.to_datetime);
+}
+
+function parse_out_dates(data) {
+	data.is_valid = true;
+	if (data.date_range == "custom") {
+		var one_invalid = false;
+		if (data.from_datetime == "") {
+			console.log(data.from_datetime);
+			var el = document.getElementById("from_datetime");
+			el.setCustomValidity("Missing input");
+			el.reportValidity();
+			one_invalid = true;
+		} else {
+			document.getElementById("from_datetime").setCustomValidity("");
+		}
+		if (data.to_datetime == "") {
+			console.log(data.to_datetime);
+			var el = document.getElementById("to_datetime");
+			el.setCustomValidity("Missing input");
+			el.reportValidity();
+			one_invalid = true;
+		} else {
+			document.getElementById("to_datetime").setCustomValidity("");
+		}
+		if (one_invalid) {
+			data.is_valid = false;
+			return;
+		}
+	} else {
+		var match = data.date_range.match(/-(\d+)(days|hours|weeks)/);
+		if (match) {
+			data.to_datetime = new Date().toISOString();
+			var mult = {"hours": 3600*1000, "days": 24*3600*1000, "weeks": 7*24*3600*1000 }[match[2]]
+			var secs = parseInt(match[1], 10) * mult;
+			data.from_datetime = new Date(new Date() - secs).toISOString();
+		} else {
+			console.error(`Unknown date range ${data.date_range}`);
+		}
+	}
 }
 
 async function clear_local_cache() {
@@ -27,48 +71,8 @@ async function fetch_user_data(data) {
 	var uid = "23770";
 	var task_list = [];
 
-	var global_from_datetime;
-	var global_to_datetime;
-	console.log
-	if (data.date_range == "custom") {
-		var one_invalid = false;
-		if (data.from_datetime == "") {
-			console.log(data.from_datetime);
-			var el = document.getElementById("from_datetime");
-			el.setCustomValidity("Missing input");
-			el.reportValidity();
-			one_invalid = true;
-		} else {
-			document.getElementById("from_datetime").setCustomValidity("");
-		}
-		if (data.to_datetime == "") {
-			console.log(data.to_datetime);
-			var el = document.getElementById("to_datetime");
-			el.setCustomValidity("Missing input");
-			el.reportValidity();
-			one_invalid = true;
-		} else {
-			document.getElementById("to_datetime").setCustomValidity("");
-		}
-		if (one_invalid) {
-			data.is_calculating = false;
-			return;
-		}
-		global_from_datetime = JSON.parse(JSON.stringify(data.from_datetime));
-		global_to_datetime = JSON.parse(JSON.stringify(data.to_datetime));
-	} else {
-		var match = data.date_range.match(/-(\d+)(days|hours|weeks)/);
-		if (match) {
-			global_to_datetime = now;
-			var mult = {"hours": 3600*1000, "days": 24*3600*1000, "weeks": 7*24*3600*1000 }[match[2]]
-			var secs = parseInt(match[1], 10) * mult;
-			global_from_datetime = new Date(new Date() - secs).toISOString();
-		} else {
-			console.error(`Unknown date range ${data.date_range}`);
-		}
-	}
 
-	task_list.push(["dl_user_changesets", uid, global_from_datetime, global_to_datetime]);
+	task_list.push(["dl_user_changesets", uid, data.from_datetime, data.to_datetime]);
 
 	const progress_bar = document.getElementById("task_process");
 	progress_bar.max = 0;
@@ -91,7 +95,7 @@ async function fetch_user_data(data) {
 				if (changesets.length >= 100) {
 					// possibly more changesets
 					var latest_timestamp = changesets.reduce((max, item) => (item.created_at > max ? item.created_at : max), changesets[0].created_at);
-					task_list.push(["dl_user_changesets", uid, latest_timestamp, global_to_datetime]);
+					task_list.push(["dl_user_changesets", uid, latest_timestamp, data.to_datetime]);
 				}
 
 				for (let c of changesets) {
@@ -143,8 +147,8 @@ async function fetch_user_data(data) {
 	}
 	progress_bar.value = progress_bar.max;
 
-	data.is_calculating = false;
 	localStorage.setItem("cached_data", JSON.stringify(cached_data));
+	data.is_calculating = false;
 }
 
 
@@ -218,7 +222,7 @@ function assertNe(val, ne, message = "Assertion failed") {
   }
 }
 
-function produceDiff() {
+function calcTagChanges(from_datetime, to_datetime) {
 	var cached_data = JSON.parse(localStorage.getItem("cached_data"));
 	assertNonNull(cached_data);
 
@@ -228,6 +232,9 @@ function produceDiff() {
 	for (const expire_changeset of Object.values(cached_data.changeset_full)) {
 		const changeset = expire_changeset.json;
 		for (const new_obj of changeset.create) {
+			if (new_obj.timestamp <= from_datetime || new_obj.timestamp >= to_datetime) {
+				continue;
+			}
 			for (const k of Object.keys(new_obj.tags)) {
 				setdefault(tag_changes, k, {'create':0, 'modify':0, 'delete':0});
 				tag_changes[k].create++;
@@ -237,6 +244,9 @@ function produceDiff() {
 			}
 		}
 		for (const new_obj of changeset.modify) {
+			if (new_obj.timestamp <= from_datetime || new_obj.timestamp >= to_datetime) {
+				continue;
+			}
 			old_obj = cached_data.objects[new_obj.type][new_obj.id][calcPrevVersion(new_obj)];
 			for (const k of Object.keys(old_obj.tags)) {
 				if (!(k in new_obj.tags)) {
@@ -263,6 +273,9 @@ function produceDiff() {
 		}
 
 		for (const old_obj of changeset.delete) {
+			if (old_obj.timestamp <= from_datetime || old_obj.timestamp >= to_datetime) {
+				continue;
+			}
 			if (Object.keys(old_obj.tags).length > 0) {
 				tagged_object_changes.delete++;
 			}
@@ -274,10 +287,7 @@ function produceDiff() {
 
 	}
 
-	console.log(tag_changes);
-	
-
-
+	return [tagged_object_changes, tag_changes];
 }
 
 function getDaysBetween(start, end) {
