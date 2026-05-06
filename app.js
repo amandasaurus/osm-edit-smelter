@@ -331,6 +331,6 @@ function formatTagChanges(tag_changes) {
 
 	summary += "</table>";
 
-	console.log(output);
+	console.log(summary);
 	return summary;
 }
