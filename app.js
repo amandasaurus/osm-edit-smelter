@@ -38,12 +38,16 @@ function parse_out_dates(data) {
 			return;
 		}
 	} else {
-		var match = data.date_range.match(/-(\d+)(days|hours|weeks)/);
-		if (match) {
+		var relative_range = data.date_range.match(/-(\d+)(days|hours|weeks)/);
+		var exact_range = data.date_range.match(/(20\d\d-\d\d-\d\d.+)\.\.(20\d\d-\d\d-\d\d.+)/);
+		if (relative_range) {
 			data.to_datetime = new Date().toISOString();
-			var mult = {"hours": 3600*1000, "days": 24*3600*1000, "weeks": 7*24*3600*1000 }[match[2]]
-			var secs = parseInt(match[1], 10) * mult;
+			var mult = {"hours": 3600*1000, "days": 24*3600*1000, "weeks": 7*24*3600*1000 }[relative_range[2]]
+			var secs = parseInt(relative_range[1], 10) * mult;
 			data.from_datetime = new Date(new Date() - secs).toISOString();
+		} else if (exact_range) {
+			data.from_datetime = new Date(exact_range[1]).toISOString();
+			data.to_datetime = new Date(exact_range[2]).toISOString();
 		} else {
 			console.error(`Unknown date range ${data.date_range}`);
 		}
