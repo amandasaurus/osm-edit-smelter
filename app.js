@@ -18,7 +18,6 @@ function parse_out_dates(data) {
 	if (data.date_range == "custom") {
 		var one_invalid = false;
 		if (data.from_datetime == "") {
-			console.log(data.from_datetime);
 			var el = document.getElementById("from_datetime");
 			el.setCustomValidity("Missing input");
 			el.reportValidity();
@@ -27,7 +26,6 @@ function parse_out_dates(data) {
 			document.getElementById("from_datetime").setCustomValidity("");
 		}
 		if (data.to_datetime == "") {
-			console.log(data.to_datetime);
 			var el = document.getElementById("to_datetime");
 			el.setCustomValidity("Missing input");
 			el.reportValidity();
