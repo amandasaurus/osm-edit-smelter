@@ -323,7 +323,7 @@ function formatTagChanges(tag_changes) {
 	res.sort((a, b) => (b[0]-a[0]));
 	var res = res.slice(0, 5);
 
-	var summary = "<table><tr><th>Tag</th><th>Total Changes</th><th>Added</th><th>Modified</th><th>Deleted</th><tr>";
+	var summary = "<table><tr><th>Tag</th><th>Total</th><th>Added</th><th>Modified</th><th>Deleted</th><tr>";
 
 	for (const [total, k] of res) {
 		summary += `<tr><td><code>${k}</code></td><td>${total}</td><td>${tag_changes[k].create}</td><td>${tag_changes[k].modify}</td><td>${tag_changes[k].delete}</td></tr>`;
