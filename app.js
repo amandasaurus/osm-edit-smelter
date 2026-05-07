@@ -1,12 +1,26 @@
 const API_URL = "https://api.openstreetmap.org"
 
-//const OAUTH_CLIENT_ID = "Tc2jpTmqbR4kTOAMBo1TpxkPaxJu5bZK5XJcX95DcYk";
-//const APP_URL = "https://amandasaurus.github.io/osm-edit-smelter/"
+const envs = {
+	local: {
+		app_url: "http://127.0.0.1:8000/",
+		oauth_client_id: "J1vAlAull1KOfYgMeTabpjTil2_i1zgxTh0UCMtpz0M",
+	},
+	github: {
+		app_url: "https://amandasaurus.github.io/osm-edit-smelter/",
+		oauth_client_id: "Tc2jpTmqbR4kTOAMBo1TpxkPaxJu5bZK5XJcX95DcYk",
+	},
+}
 
-const OAUTH_CLIENT_ID = "J1vAlAull1KOfYgMeTabpjTil2_i1zgxTh0UCMtpz0M";
-const APP_URL = "http://127.0.0.1:8000/";
+let env = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
+	for (const key in envs) {
+		if (window.location.toString().startsWith(envs[key].app_url)) {
+			env = envs[key];
+		}
+	}
+	console.log(env);
+
 	const params = new URLSearchParams(window.location.search);
 	if (params.has("code")) {
 		const code = params.get("code");
@@ -17,8 +31,8 @@ document.addEventListener("DOMContentLoaded", async () => {
 			body: new URLSearchParams({
 				grant_type: "authorization_code",
 				code: code,
-				redirect_uri: APP_URL,
-				client_id: OAUTH_CLIENT_ID
+				redirect_uri: env.app_url,
+				client_id: env.oauth_client_id,
 			})
 		});
 		const token_json = await res.json();
@@ -38,7 +52,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 function authToOSM() {
 	console.log("Here");
-	window.location.href = `${API_URL}/oauth2/authorize?response_type=code&client_id=${OAUTH_CLIENT_ID}&redirect_uri=${APP_URL}&scope=read_prefs`;
+	window.location.href = `${API_URL}/oauth2/authorize?response_type=code&client_id=${env.oauth_client_id}&redirect_uri=${env.app_url}&scope=read_prefs`;
 }
 
 let presets = null;
