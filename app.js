@@ -89,8 +89,6 @@ async function generate_stats(data) {
 	} else {
 
 		document.getElementById("output").innerHTML = await calcTagChangeTable(tag_changes);
-		//document.getElementById("output").innerHTML = calcChangeTagsIDPresets(obj_pre_post);
-		//
 	}
 }
 
@@ -157,7 +155,7 @@ async function fetch_user_data(data) {
 	}
 	const now = new Date().toISOString();
 
-	var uid = "23770";
+	var uid = data.user.id;
 	var task_list = [];
 
 
