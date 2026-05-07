@@ -14,25 +14,38 @@
 <body>
 	<h1>Edit Smelter</h1>
 
-	
-	<form @submit.prevent="generate_stats($data)" x-init="initFormData($data)" x-data="{ date_range: '-7days', from_datetime:'', to_datetime:'', is_calculating: false, is_valid: true, prev_ranges: [ '2026-03-30T00:00Z..2026-04-12T00:00Z' ] }">
-		<select x-model="date_range">
-			<template x-for="range in date_range_values">
-				<option x-bind:value="range[0]" x-text="range[1]"></option>
-			</template>
-			<option value="custom">Custom</option>
-		</select>
+	<div x-data="{user: null}" x-init="user = JSON.parse(localStorage.getItem('osm_user_details'))">
 
-		<div x-show="date_range == 'custom'">
-			Start: <input id="from_datetime" x-model="from_datetime" type="datetime-local" @input="$event.target.setCustomValidity('')"  />
-			End: <input id="to_datetime" x-model="to_datetime" type="datetime-local" @input="$event.target.setCustomValidity('')" /> 
-		</div>
-		<button submit>Calculate!</button>
-		<div x-show="is_calculating">
-			Working: <progress id="task_process" value=0 max=0></progress>
+		<div x-show="user == null">
+			<button @click="authToOSM()">Connect your OpenStreetMap account</button>
 		</div>
 
-	<div id="output"></div>
+		
+		<template x-if="user != null">
+			<div>
+				<span x-data="{profile_url: null}" x-init="profile_url = `https://www.openstreetmap.org/user/${user.display_name}`">Welcome <img :src="user.img.href" style="height: 1lh" </img><a :href="profile_url" x-text="user.display_name"></a>!</span>
+			<form @submit.prevent="generate_stats($data)" x-init="initFormData($data)" x-data="{ date_range: '-7days', from_datetime:'', to_datetime:'', is_calculating: false, is_valid: true, prev_ranges: [ '2026-03-30T00:00Z..2026-04-12T00:00Z' ] }">
+				<select x-model="date_range">
+					<template x-for="range in date_range_values">
+						<option x-bind:value="range[0]" x-text="range[1]"></option>
+					</template>
+					<option value="custom">Custom</option>
+				</select>
+
+				<div x-show="date_range == 'custom'">
+					Start: <input id="from_datetime" x-model="from_datetime" type="datetime-local" @input="$event.target.setCustomValidity('')"  />
+					End: <input id="to_datetime" x-model="to_datetime" type="datetime-local" @input="$event.target.setCustomValidity('')" /> 
+				</div>
+				<button submit>Calculate!</button>
+				<div x-show="is_calculating">
+					Working: <progress id="task_process" value=0 max=0></progress>
+				</div>
+			</form>
+
+		<div id="output"></div>
+
+		</div>
+		</template>
 
 	<details closed>
 		<summary>Advanced settings</summary>

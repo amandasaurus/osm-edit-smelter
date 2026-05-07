@@ -1,5 +1,46 @@
 const API_URL = "https://api.openstreetmap.org"
 
+//const OAUTH_CLIENT_ID = "Tc2jpTmqbR4kTOAMBo1TpxkPaxJu5bZK5XJcX95DcYk";
+//const APP_URL = "https://amandasaurus.github.io/osm-edit-smelter/"
+
+const OAUTH_CLIENT_ID = "J1vAlAull1KOfYgMeTabpjTil2_i1zgxTh0UCMtpz0M";
+const APP_URL = "http://127.0.0.1:8000/";
+
+document.addEventListener("DOMContentLoaded", async () => {
+	const params = new URLSearchParams(window.location.search);
+	if (params.has("code")) {
+		const code = params.get("code");
+		params.delete("code");
+
+		const res = await fetch(`${API_URL}/oauth2/token`, {
+			method: "POST",
+			body: new URLSearchParams({
+				grant_type: "authorization_code",
+				code: code,
+				redirect_uri: APP_URL,
+				client_id: OAUTH_CLIENT_ID
+			})
+		});
+		const token_json = await res.json();
+		const access_token = token_json.access_token;
+		localStorage.setItem("osm_oauth_access_token", access_token);
+
+		const details_res = await fetch(`${API_URL}/api/0.6/user/details.json`, { headers: { Authorization: `Bearer ${access_token}` }});
+		const details_json = await details_res.json();
+		console.log(details_json);
+		localStorage.setItem("osm_user_details", JSON.stringify(details_json.user));
+
+		window.location.search = params.toString();
+
+	}
+});
+
+
+function authToOSM() {
+	console.log("Here");
+	window.location.href = `${API_URL}/oauth2/authorize?response_type=code&client_id=${OAUTH_CLIENT_ID}&redirect_uri=${APP_URL}&scope=read_prefs`;
+}
+
 let presets = null;
 async function getPresets() {
 	if (presets) return presets;
@@ -96,6 +137,9 @@ function parse_out_dates(data) {
 
 async function clear_local_cache() {
 	localStorage.removeItem("cached_data");
+	localStorage.removeItem("osm_oauth_access_token");
+	localStorage.removeItem("osm_user_details");
+	window.location.reload();
 }
 
 async function fetch_user_data(data) {
