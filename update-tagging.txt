@@ -1,0 +1,11 @@
+Download new id tagging scheme release from https://github.com/openstreetmap/id-tagging-schema/releases
+& unzip.
+
+Build the tag matcher:
+
+		jq <id-tagging-schema-6.16.0/dist/presets.json  'map_values({"tags": .tags , "matchScore": (.matchScore // 1.0) })' > presets.json
+
+		jq <id-tagging-schema-6.16.0/dist/translations/en.json ".en.presets.presets|map_values(.name)" > en_presets.json
+
+
+	jq <id-tagging-schema-6.16.0/dist/translations/en.json ".en.presets.fields|map_values(.label)|with_entries(select(.value != \"Type\"))" > en_field_names.json		

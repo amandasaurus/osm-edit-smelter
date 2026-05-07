@@ -1,16 +1,49 @@
 const API_URL = "https://api.openstreetmap.org"
 
+let presets = null;
+async function getPresets() {
+	if (presets) return presets;
+	const res = await fetch("./presets.json");
+	presets = await res.json();
+	return presets;
+}
+
+let field_names = null;
+async function getFieldNames() {
+	if (field_names) return field_names;
+	const res = await fetch("./en_field_names.json");
+	field_names = await res.json();
+	return field_names;
+}
+
+function initFormData(data) {
+	data.date_range_values = [
+		["-7days", "Last 7 days"],
+		["-24hours", "Last 24 hours"],
+		["-6weeks", "Last 6 weeks"],
+	];
+}
+
 async function generate_stats(data) {
 	parse_out_dates(data);
 	if (!data.is_valid) {
 		return;
 	}
+
 	document.getElementById("output").innerHTML = "";
+
 	await fetch_user_data(data);
 
 	var [tagged_object_changes, tag_changes] = calcTagChanges(data.from_datetime, data.to_datetime);
+	var obj_pre_post = calcObjectPrePost(data.from_datetime, data.to_datetime);
+	if (obj_pre_post.length == 0) {
+		document.getElementById("output").innerHTML = "No Edits in this time! Get Mapping!";
+	} else {
 
-	document.getElementById("output").innerHTML = formatTagChanges(tag_changes);
+		document.getElementById("output").innerHTML = await calcTagChangeTable(tag_changes);
+		//document.getElementById("output").innerHTML = calcChangeTagsIDPresets(obj_pre_post);
+		//
+	}
 }
 
 function parse_out_dates(data) {
@@ -227,6 +260,39 @@ function assertNe(val, ne, message = "Assertion failed") {
   }
 }
 
+function calcObjectPrePost(from_datetime, to_datetime) {
+	var cached_data = JSON.parse(localStorage.getItem("cached_data"));
+	assertNonNull(cached_data);
+
+	var res = [];
+
+	for (const expire_changeset of Object.values(cached_data.changeset_full)) {
+		const changeset = expire_changeset.json;
+		for (const new_obj of changeset.create) {
+			if (new_obj.timestamp <= from_datetime || new_obj.timestamp >= to_datetime) {
+				continue;
+			}
+			res.push([null, new_obj]);
+		}
+		for (const new_obj of changeset.modify) {
+			if (new_obj.timestamp <= from_datetime || new_obj.timestamp >= to_datetime) {
+				continue;
+			}
+			old_obj = cached_data.objects[new_obj.type][new_obj.id][calcPrevVersion(new_obj)];
+			res.push([old_obj, new_obj]);
+		}
+
+		for (const old_obj of changeset.delete) {
+			if (old_obj.timestamp <= from_datetime || old_obj.timestamp >= to_datetime) {
+				continue;
+			}
+			res.push([old_obj, null]);
+		}
+	}
+	
+	return res;
+}
+
 function calcTagChanges(from_datetime, to_datetime) {
 	var cached_data = JSON.parse(localStorage.getItem("cached_data"));
 	assertNonNull(cached_data);
@@ -314,7 +380,7 @@ function getDaysBetween(start, end) {
 	return days;
 }
 
-function formatTagChanges(tag_changes) {
+async function calcTagChangeTable(tag_changes) {
 	var res = []
 	for (const k of Object.keys(tag_changes)) {
 		res.push([tag_changes[k].create+tag_changes[k].modify+tag_changes[k].delete, k]);
@@ -323,10 +389,14 @@ function formatTagChanges(tag_changes) {
 	res.sort((a, b) => (b[0]-a[0]));
 	var res = res.slice(0, 100);
 
+	const field_names = await getFieldNames();
+
 	var summary = "<table><tr><th>Tag</th><th>Total</th><th>Added</th><th>Modified</th><th>Deleted</th><tr>";
 
 	for (const [total, k] of res) {
-		summary += `<tr><td><code>${k}</code></td><td>${total}</td><td>${tag_changes[k].create}</td><td>${tag_changes[k].modify}</td><td>${tag_changes[k].delete}</td></tr>`;
+		var field_text = field_names[k] ?? `<code>${k}</code>`;
+
+		summary += `<tr><td>${field_text}</td><td>${total}</td><td>${tag_changes[k].create}</td><td>${tag_changes[k].modify}</td><td>${tag_changes[k].delete}</td></tr>`;
 	}
 
 	summary += "</table>";
@@ -334,3 +404,8 @@ function formatTagChanges(tag_changes) {
 	console.log(summary);
 	return summary;
 }
+
+function calcChangeTagsIDPresets(obj_pre_post) {
+	console.log(obj_pre_post);
+}
+

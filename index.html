@@ -9,17 +9,17 @@
     body { font-family: sans-serif; margin: 0; padding: 20px; }
   </style>
   <script src="./alpinejs-3.15.11.min.js" defer></script>
-  <script src="app.js" defer></script>
+  <script src="app.js"></script>
 </head>
 <body>
 	<h1>Edit Smelter</h1>
 
 	
-	<form @submit.prevent="generate_stats($data)" x-data="{ date_range: '-7days', from_datetime:'', to_datetime:'', is_calculating: false, is_valid: true }">
+	<form @submit.prevent="generate_stats($data)" x-init="initFormData($data)" x-data="{ date_range: '-7days', from_datetime:'', to_datetime:'', is_calculating: false, is_valid: true, prev_ranges: [ '2026-03-30T00:00Z..2026-04-12T00:00Z' ] }">
 		<select x-model="date_range">
-			<option value="-7days">Last week</option>
-			<option value="-24hours">Last 24 hours</option>
-			<option value="-6weeks">Last 6 weeks</option>
+			<template x-for="range in date_range_values">
+				<option x-bind:value="range[0]" x-text="range[1]"></option>
+			</template>
 			<option value="custom">Custom</option>
 		</select>
 
