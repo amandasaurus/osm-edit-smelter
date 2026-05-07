@@ -22,6 +22,13 @@ function initFormData(data) {
 		["-24hours", "Last 24 hours"],
 		["-6weeks", "Last 6 weeks"],
 	];
+
+	//const now = new Date();
+	//const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+	//data.date_range_values.push(["this_month", `This month (${months[now.getMonth()]})`])
+	//var last_month = new Date(now);
+	//last_month.setMonth(now.getMonth()-1);
+	//data.date_range_values.push(["last_month", `Last month (${months[last_month.getMonth()]})`])
 }
 
 async function generate_stats(data) {
@@ -401,7 +408,6 @@ async function calcTagChangeTable(tag_changes) {
 
 	summary += "</table>";
 
-	console.log(summary);
 	return summary;
 }
 
