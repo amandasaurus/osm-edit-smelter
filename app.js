@@ -14,6 +14,10 @@ const envs = {
 let env = null;
 
 document.addEventListener("DOMContentLoaded", async () => {
+	if (window.location.toString() == "http://localhost:8000/") {
+		// OSM Website only allows 127.0.0.1 hosts, not localhost (or ::1)
+		window.location = "http://127.0.0.1:8000/"
+	}
 	for (const key in envs) {
 		if (window.location.toString().startsWith(envs[key].app_url)) {
 			env = envs[key];
