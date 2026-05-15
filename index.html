@@ -14,6 +14,9 @@
 <body>
 	<h1>Edit Smelter</h1>
 
+	<p>What did you edit in OSM yesterday? Last week? This OSM Edit Smelter will summarize your OpenStreetMap contributions in a time period, and tell you how much, and what you edited</p>
+	<p>Source code is on Github: <a href="http://github.com/amandasaurus/osm-edit-smelter"><code>amandasaurus/osm-edit-smelter</code></a>. Made by <a href="https://en.osm.town/@amapanda">Amanda</a></p>
+
 	<div x-data="{user: null}" x-init="user = JSON.parse(localStorage.getItem('osm_user_details'))">
 
 		<div x-show="user == null">
