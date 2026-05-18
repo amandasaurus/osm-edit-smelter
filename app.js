@@ -115,8 +115,10 @@ async function generate_stats(data) {
 		//console.log(obj_pre_post);
 
 		document.getElementById("output").innerHTML = "";
-		//document.getElementById("output").innerHTML += await calcTagChangeTable(tag_changes);
+		document.getElementById("output").innerHTML += "<h2>Objects</h2>";
 		document.getElementById("output").innerHTML += await calcObjChangeTable(obj_pre_post);
+		document.getElementById("output").innerHTML += "<h2>Tags</h2>";
+		document.getElementById("output").innerHTML += await calcTagChangeTable(tag_changes);
 	}
 }
 
@@ -484,7 +486,6 @@ async function calcTagChangeTable(tag_changes) {
 async function calcObjChangeTable(obj_pre_post) {
 	var obj_changes = []
 	const presets = await getPresets();
-	console.log(presets);
 
 	for (const [old_obj, new_obj] of obj_pre_post) {
 		var oldPreset = getPresetMatch(presets, old_obj);
@@ -502,7 +503,6 @@ async function calcObjChangeTable(obj_pre_post) {
 			obj_changes[newPreset].delete += 1;
 		}
 	}
-	console.log(obj_changes);
 
 	var popular_objects = []
 	for (const k of Object.keys(obj_changes)) {
