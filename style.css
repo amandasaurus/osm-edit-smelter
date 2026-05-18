@@ -9,3 +9,7 @@
 body {
 	font-family: "Elms Sans";
 }
+
+::root {
+	--background-body: "#F3F9E3";
+}
