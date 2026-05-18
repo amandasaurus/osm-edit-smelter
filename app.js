@@ -23,7 +23,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 			env = envs[key];
 		}
 	}
-	console.log(env);
 
 	const params = new URLSearchParams(window.location.search);
 	if (params.has("code")) {
@@ -67,6 +66,14 @@ async function getPresets() {
 	return presets;
 }
 
+let presets_names = null;
+async function getPresetNames() {
+	if (presets_names) return presets_names;
+	const res = await fetch("./en_presets.json");
+	preset_names = await res.json();
+	return preset_names;
+}
+
 let field_names = null;
 async function getFieldNames() {
 	if (field_names) return field_names;
@@ -105,8 +112,11 @@ async function generate_stats(data) {
 	if (obj_pre_post.length == 0) {
 		document.getElementById("output").innerHTML = "No Edits in this time! Get Mapping!";
 	} else {
+		//console.log(obj_pre_post);
 
-		document.getElementById("output").innerHTML = await calcTagChangeTable(tag_changes);
+		document.getElementById("output").innerHTML = "";
+		//document.getElementById("output").innerHTML += await calcTagChangeTable(tag_changes);
+		document.getElementById("output").innerHTML += await calcObjChangeTable(obj_pre_post);
 	}
 }
 
@@ -471,7 +481,100 @@ async function calcTagChangeTable(tag_changes) {
 	return summary;
 }
 
+async function calcObjChangeTable(obj_pre_post) {
+	var obj_changes = []
+	const presets = await getPresets();
+	console.log(presets);
+
+	for (const [old_obj, new_obj] of obj_pre_post) {
+		var oldPreset = getPresetMatch(presets, old_obj);
+		var newPreset = getPresetMatch(presets, new_obj);
+		if (oldPreset == null && newPreset == null) {
+			// do nothing.
+		} else if (oldPreset == newPreset) {
+			setdefault(obj_changes, newPreset, {'create':0, 'modify':0, 'delete':0});
+			obj_changes[newPreset].modify += 1;
+		} else if (oldPreset != null) {
+			setdefault(obj_changes, oldPreset, {'create':0, 'modify':0, 'delete':0});
+			obj_changes[oldPreset].delete += 1;
+		} else if (newPreset != null) {
+			setdefault(obj_changes, newPreset, {'create':0, 'modify':0, 'delete':0});
+			obj_changes[newPreset].delete += 1;
+		}
+	}
+	console.log(obj_changes);
+
+	var popular_objects = []
+	for (const k of Object.keys(obj_changes)) {
+		popular_objects.push([obj_changes[k].create+obj_changes[k].modify+obj_changes[k].delete, k]);
+	}
+
+	popular_objects.sort((a, b) => (b[0]-a[0]));
+	var popular_objects = popular_objects.slice(0, 100);
+
+	const presets_names = await getPresetNames();
+
+	var summary = "<table><tr><th>Object</th><th>Total</th><th>Added</th><th>Modified</th><th>Deleted</th><tr>";
+
+	for (const [total, k] of popular_objects) {
+		var obj_text = presets_names[k] ?? `<code>${k}</code>`;
+
+		summary += `<tr><td>${obj_text}</td><td>${total}</td><td>${obj_changes[k].create}</td><td>${obj_changes[k].modify}</td><td>${obj_changes[k].delete}</td></tr>`;
+	}
+
+	summary += "</table>";
+
+
+	return summary;
+}
+
 function calcChangeTagsIDPresets(obj_pre_post) {
 	console.log(obj_pre_post);
 }
 
+
+function nonStarValues(x) {
+	return Object.values(x).filter(v => v!="*").length;
+}
+function getPresetMatch(presets, obj) {
+	if (obj == null) {
+		return null;
+	}
+	const tags = obj.tags;
+	var matching_preset = null;
+	for (const [preset_name, preset] of Object.entries(presets)) {
+		var matches = true;
+		//console.log(preset_name, preset);
+		for (const [k, v] of Object.entries(preset.tags)) {
+			if (!(k in tags)) {
+				matches = false;
+			} else {
+				if (v != "*") {
+					if (tags[k] != v) {
+						matches = false;
+					}
+				}
+			}
+		}
+		// Dunno why this doesn't work
+		//if (Object.entries(value.tags).every(([k, v]) => { if (v == "*") { k in tags } else { k in tags && tags[k] == v } })) {
+
+		if (matches) {
+			if (matching_preset == null) {
+				matching_preset = structuredClone([preset_name, preset]);
+			} else if (nonStarValues(preset.tags) > nonStarValues(matching_preset[1].tags)) {
+				matching_preset = structuredClone([preset_name, preset]);
+			} else if (nonStarValues(preset.tags) == nonStarValues(matching_preset[1].tags) && preset.matchScore > matching_preset[1].matchScore) {
+				matching_preset = structuredClone([preset_name, preset]);
+			} else {
+				// the existing one is better
+			}
+		}
+	}
+
+	if (matching_preset == null) {
+		return null;
+	}
+
+	return matching_preset[0]
+}

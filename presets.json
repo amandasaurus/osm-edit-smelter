@@ -17,19 +17,11 @@
     },
     "matchScore": 0.7
   },
-  "relation": {
-    "tags": {},
-    "matchScore": 1.0
-  },
   "polling_station": {
     "tags": {
       "polling_station": "*"
     },
     "matchScore": 0.75
-  },
-  "point": {
-    "tags": {},
-    "matchScore": 0.1
   },
   "playground": {
     "tags": {
@@ -48,10 +40,6 @@
       "marker": "*"
     },
     "matchScore": 1.0
-  },
-  "line": {
-    "tags": {},
-    "matchScore": 0.1
   },
   "junction": {
     "tags": {
