@@ -8,15 +8,12 @@
 
 body {
 	font-family: "Elms Sans";
-}
-
-::root {
-	--background-body: "#F3F9E3";
-}
-
-footer {
-  position: fixed;
-  bottom: 0;
-  width: 800px;
-  padding-bottom: 10px;
+	box-sizing: border-box;
+	box-shadow: 0px 0px 0px 45vw ivory inset;
+	border: 6px double #452104;
+	border-radius: 2rem;
+	padding: 1em 2vw;
+	margin: 1vw auto;
+	background: #F7AF74;
+	color: #452104;
 }

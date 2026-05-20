@@ -11,7 +11,8 @@
   <script src="./app.js"></script>
 </head>
 <body>
-	<h1>Edit Smelter</h1>
+	<main class="container">
+	<h1>OpenStreetMap Edit Smelter</h1>
 
 	<p>What did you edit in OSM yesterday? Last week? This OSM Edit Smelter will read all your OSM  summarize your OpenStreetMap contributions in a time period, and tell you how much, and what you edited</p>
 	<p>Source code is on Github: <a href="http://github.com/amandasaurus/osm-edit-smelter"><code>amandasaurus/osm-edit-smelter</code></a>. Made by <a href="https://en.osm.town/@amapanda">Amanda</a></p>
@@ -46,7 +47,9 @@
 				</div>
 			</form>
 
-		<div id="output"></div>
+		<div id="output">
+			<p><i>(results will go here!)</i></p>
+		</div>
 
 		</div>
 		</template>
@@ -55,15 +58,17 @@
 		<summary>Advanced settings</summary>
 		<button @click="clear_local_cache()" title="If this are acting silly, this will remove all your locally cached data">Clear local cache</button>
 		<div>
-			<p>Credits &amp; Tools used</p>
+			<p>Credits, Tools, &amp; Similar sites</p>
 			<ul>
 				<li><a href="https://github.com/openstreetmap/id-tagging-schema">iD Tagging Schema</a>. Used for interpreting the edits you make.</li>
+				<li><a href="https://hdyc.neis-one.org/">How Did You Contribute to OSM? (HDYC)</a> is the grandmother of all these sites, from <a href="https://neis-one.org/">Pascal Neis</a>.</li>
 				<li><a href="https://alpinejs.dev/">AlpineJS</a> for interactivity</li>
 				<li><a href="https://javascript.info/">Javascript.info: The Modern JavaScript Tutorial</a> for helping me with javascript</li>
 			</ul>
 		</div>
 	</details>
 
+	</main>
 	<footer>
 		<a href="https://www.openstreetmap.org/">OpenStreetMap</a>
 	  | 🏳️‍⚧️ Trans Rights 🏳️‍⚧️
