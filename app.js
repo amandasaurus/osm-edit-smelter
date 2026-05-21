@@ -516,12 +516,21 @@ async function calcObjChangeTable(obj_pre_post, debug_logs) {
 		} else if (oldPreset == newPreset) {
 			setdefault(obj_changes, newPreset, {'create':0, 'modify':0, 'delete':0});
 			obj_changes[newPreset].modify += 1;
-		} else if (oldPreset != null) {
+			if (debug_logs) {
+				console.log(`+1 to ${newPreset} modify`, old_obj, new_obj);
+			}
+		} else if (oldPreset != null && newPreset == null) {
 			setdefault(obj_changes, oldPreset, {'create':0, 'modify':0, 'delete':0});
 			obj_changes[oldPreset].delete += 1;
-		} else if (newPreset != null) {
+			if (debug_logs) {
+				console.log(`+1 to ${newPreset} delete`, old_obj, new_obj);
+			}
+		} else if (oldPreset == null && newPreset != null) {
 			setdefault(obj_changes, newPreset, {'create':0, 'modify':0, 'delete':0});
-			obj_changes[newPreset].delete += 1;
+			obj_changes[newPreset].create += 1;
+			if (debug_logs) {
+				console.log(`+1 to ${newPreset} create`, old_obj, new_obj);
+			}
 		}
 	}
 
