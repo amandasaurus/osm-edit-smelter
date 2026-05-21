@@ -107,12 +107,28 @@ async function generate_stats(data) {
 
 	await fetch_user_data(data);
 
+	if (data.debug_logs) {
+		console.log("user data has been retrieved");
+	}
+
 	var [tagged_object_changes, tag_changes] = calcTagChanges(data.from_datetime, data.to_datetime);
+
+	if (data.debug_logs) {
+		console.log("Got following tagged_object_changes: total create %d modify %d delete %d", tagged_object_changes.create, tagged_object_changes.modify, tagged_object_changes.delete);
+		console.log("Got following %d tag_changes", tag_changes.length);
+		console.log(tag_changes);
+	}
+
 	var obj_pre_post = calcObjectPrePost(data.from_datetime, data.to_datetime);
+
 	if (obj_pre_post.length == 0) {
 		document.getElementById("output").innerHTML = "No Edits in this time! Get Mapping!";
+		if (data.debug_logs) { console.log("No edits"); }
 	} else {
-		//console.log(obj_pre_post);
+		if (data.debug_logs) {
+			console.log("Got the following %d changed objects", obj_pre_post.length);
+			console.log(obj_pre_post);
+		}
 
 		document.getElementById("output").innerHTML = "";
 		document.getElementById("output").innerHTML += "<h2>Objects</h2>";

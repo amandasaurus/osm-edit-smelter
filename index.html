@@ -16,7 +16,7 @@
 
 	<p>What did you edit in OSM yesterday? Last week? This OSM Edit Smelter will read all your OSM  summarize your OpenStreetMap contributions in a time period, and tell you how much, and what you edited. Made by <a href="https://en.osm.town/@amapanda">amᵃᵖanda</a>.</p>
 
-	<div x-data="{user: null}" x-init="user = JSON.parse(localStorage.getItem('osm_user_details'))">
+	<div x-data="{debug_logs: false, user: null}" x-init="user = JSON.parse(localStorage.getItem('osm_user_details'))">
 
 		<div x-show="user == null">
 			<p>First, you must log in via OpenStreetMap, and all us to read your “User Preferences”. This allows us to see who you are, and prevents this site showing other people your OSM edits. This website will not be all </p>
@@ -56,6 +56,7 @@
 	<details closed>
 		<summary>Advanced settings</summary>
 		<button @click="clear_local_cache()" title="If this are acting silly, this will remove all your locally cached data">Clear local cache</button>
+		<label><input type=checkbox x-model="debug_logs"> Log debug messages to Javascript console: </label>
 		<div>
 			<p>Credits, Tools, &amp; Similar sites</p>
 			<ul>
