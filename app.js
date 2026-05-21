@@ -269,6 +269,11 @@ async function fetch_user_data(data) {
 					var res = await fetch(`${API_URL}/api/0.6/${obj.type}/${obj.id}/${prev_version}.json`);
 					var jsonified = await res.json();
 					var new_obj = jsonified.elements[0];
+					if (!new_obj.visible && !("tags" in new_obj)) {
+						// OSM API doesn't include tags if the object has been deleted.
+						// Our code is simplier if there is a tags there.
+						new_obj.tags = {};
+					}
 					cached_data.objects[new_obj.type][new_obj.id][new_obj.version] = new_obj;
 				}
 
