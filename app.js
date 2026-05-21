@@ -179,10 +179,14 @@ function parse_out_dates(data) {
 	}
 }
 
-async function clear_local_cache() {
-	localStorage.removeItem("cached_data");
+async function disconnect_osm_acc() {
 	localStorage.removeItem("osm_oauth_access_token");
 	localStorage.removeItem("osm_user_details");
+	window.location.reload();
+}
+
+async function clear_local_cache() {
+	localStorage.removeItem("cached_data");
 	window.location.reload();
 }
 
