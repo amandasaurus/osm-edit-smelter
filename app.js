@@ -132,9 +132,9 @@ async function generate_stats(data) {
 
 		document.getElementById("output").innerHTML = "";
 		document.getElementById("output").innerHTML += "<h2>Objects</h2>";
-		document.getElementById("output").innerHTML += await calcObjChangeTable(obj_pre_post);
+		document.getElementById("output").innerHTML += await calcObjChangeTable(obj_pre_post, data.debug_logs);
 		document.getElementById("output").innerHTML += "<h2>Tags</h2>";
-		document.getElementById("output").innerHTML += await calcTagChangeTable(tag_changes);
+		document.getElementById("output").innerHTML += await calcTagChangeTable(tag_changes, data.debug_logs);
 	}
 }
 
@@ -480,7 +480,7 @@ function getDaysBetween(start, end) {
 	return days;
 }
 
-async function calcTagChangeTable(tag_changes) {
+async function calcTagChangeTable(tag_changes, debug_logs) {
 	var res = []
 	for (const k of Object.keys(tag_changes)) {
 		res.push([tag_changes[k].create+tag_changes[k].modify+tag_changes[k].delete, k]);
@@ -504,7 +504,7 @@ async function calcTagChangeTable(tag_changes) {
 	return summary;
 }
 
-async function calcObjChangeTable(obj_pre_post) {
+async function calcObjChangeTable(obj_pre_post, debug_logs) {
 	var obj_changes = []
 	const presets = await getPresets();
 
